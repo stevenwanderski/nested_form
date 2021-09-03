@@ -31,14 +31,14 @@ module NestedForm
 
       options[:class] = [options[:class], "add_nested_fields"].compact.join(" ")
       options["data-association"] = association
-      options["data-blueprint-id"] = fields_blueprint_id = fields_blueprint_id_for(association)
+      options["data-blueprint-id"] = fields_blueprint_id = fields_blueprint_id_for(options[:blueprint] || association)
       args << (options.delete(:href) || "javascript:void(0)")
       args << options
 
       @fields ||= {}
       @template.after_nested_form(fields_blueprint_id) do
         blueprint = {:id => fields_blueprint_id, :style => 'display: none'}
-        block, options = @fields[fields_blueprint_id].values_at(:block, :options)
+        block, options = @fields[fields_blueprint_id_for(association)].values_at(:block, :options)
         options[:child_index] = "new_#{association}"
         blueprint[:"data-blueprint"] = fields_for(association, model_object, options, &block).to_str
         @template.content_tag(:div, nil, blueprint)
@@ -83,7 +83,7 @@ module NestedForm
       end
 
       @fields ||= {}
-      @fields[fields_blueprint_id_for(association_name)] = { :block => block, :options => options }
+      @fields[fields_blueprint_id_for(options[:blueprint] || association_name)] = { :block => block, :options => options }
       super(association_name, *(args << block))
     end
 
